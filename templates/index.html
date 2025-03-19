@@ -1,0 +1,118 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cute To-Do List</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="flower top-left"></div>
+    <div class="flower top-right"></div>
+    <div class="flower bottom-left"></div>
+    <div class="flower bottom-right"></div>
+    
+    <div class="container">
+        <div class="header">
+            <h1>✿ My To-Do List ✿</h1>
+            <div class="butterfly"></div>
+        </div>
+        
+        <div class="tab-container">
+            <button class="tab-button active" onclick="filterTasks('all')">All Tasks</button>
+            {% for category in categories %}
+                <button class="tab-button" onclick="filterTasks('{{ category }}')">{{ category }}</button>
+            {% endfor %}
+        </div>
+        
+        <div class="add-task-section">
+            <button id="showFormBtn" class="cute-button">✨ Add New Task ✨</button>
+            <div id="taskForm" class="task-form hidden">
+                <form action="/add" method="POST" class="add-task-form">
+                    <div class="form-group">
+                        <input type="text" name="task" placeholder="What do you need to do?" required>
+                    </div>
+                    <div class="form-group">
+                        <select name="category">
+                            {% for category in categories %}
+                                <option value="{{ category }}">{{ category }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <select name="priority">
+                            <option value="low">Low Priority</option>
+                            <option value="medium" selected>Medium Priority</option>
+                            <option value="high">High Priority</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="submit-btn">Add Task</button>
+                </form>
+            </div>
+        </div>
+        
+        <div id="taskList" class="task-list-container">
+            {% include 'task_list.html' %}
+        </div>
+    </div>
+    
+    <script>
+        // Show/hide task form
+        document.getElementById('showFormBtn').addEventListener('click', function() {
+            const form = document.getElementById('taskForm');
+            form.classList.toggle('hidden');
+            if (!form.classList.contains('hidden')) {
+                form.querySelector('input').focus();
+            }
+        });
+        
+        // Filter tasks
+        function filterTasks(category) {
+            const buttons = document.querySelectorAll('.tab-button');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            fetch(`/filter/${category}`)
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById('taskList').innerHTML = html;
+                    initTaskAnimations();
+                });
+        }
+        
+        // Task animations
+        function initTaskAnimations() {
+            const tasks = document.querySelectorAll('.task-item');
+            tasks.forEach(task => {
+                task.addEventListener('mouseenter', function() {
+                    this.classList.add('task-hover');
+                });
+                task.addEventListener('mouseleave', function() {
+                    this.classList.remove('task-hover');
+                });
+            });
+            
+            // Check completion animations
+            document.querySelectorAll('.toggle-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    const taskItem = this.closest('.task-item');
+                    if (!taskItem.classList.contains('completed')) {
+                        e.preventDefault();
+                        taskItem.classList.add('completing');
+                        setTimeout(() => {
+                            window.location = this.getAttribute('href');
+                        }, 500);
+                    }
+                });
+            });
+        }
+        
+        // Initialize animations
+        document.addEventListener('DOMContentLoaded', function() {
+            initTaskAnimations();
+        });
+    </script>
+</body>
+</html>

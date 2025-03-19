@@ -1,0 +1,46 @@
+<!-- templates/task_list.html -->
+{% if tasks %}
+    <ul class="task-list">
+        {% for task in tasks %}
+            <li class="task-item {% if task.completed %}completed{% endif %} priority-{{ task.priority }}">
+                <div class="task-content">
+                    <span class="task-title">{{ task.title }}</span>
+                    <div class="task-details">
+                        <span class="task-category">{{ task.category }}</span>
+                        <span class="task-date">{{ task.date_added }}</span>
+                    </div>
+                </div>
+                <div class="task-actions">
+                    <a href="{{ url_for('toggle', task_id=task.id) }}" class="toggle-btn">
+                        {% if task.completed %}
+                            <i class="fas fa-check-circle"></i>
+                        {% else %}
+                            <i class="far fa-circle"></i>
+                        {% endif %}
+                    </a>
+                    <a href="{{ url_for('delete', task_id=task.id) }}" class="delete-btn">
+                        <i class="fas fa-times"></i>
+                    </a>
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <div class="no-tasks">
+        <p>✿ No tasks yet! Add something to your list ✿</p>
+        <div class="cute-cat">
+            <div class="cat-ears">
+                <div class="ear left"></div>
+                <div class="ear right"></div>
+            </div>
+            <div class="cat-face">
+                <div class="eyes">
+                    <div class="eye left"></div>
+                    <div class="eye right"></div>
+                </div>
+                <div class="nose"></div>
+                <div class="mouth"></div>
+            </div>
+        </div>
+    </div>
+{% endif %}
